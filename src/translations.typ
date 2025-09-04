@@ -1,42 +1,25 @@
 #import "utils.typ": first-letter-to-upper
 
-#let day-names = toml("translations/day_name.toml")
-#let month-names = toml("translations/month_name.toml")
+#let date = toml("translations/data.toml")
 
-#let day-name = (weekday, ..args) => {
-  let lang = "en"
-  let upper = false
-  for arg in args.pos() {
-    if type(arg) == str {
-      lang = arg
-    } else if type(arg) == bool {
-      upper = arg
-    }
-  }
-  let weekday-to-str = str(weekday)
-  let name = day-names.at(lang).at(weekday-to-str)
-  if upper {
-    return first-letter-to-upper(name)
-  } else {
-    return name
-  }
+#let get-day-name = (
+  weekday,
+  lang: "en",
+  type: "stand-alone",
+  width: "wide",
+) => {
+  // Convert to string for TOML key lookup
+  let weekday-str = str(weekday)
+  data.at(lang).at("days").at(type).at(width).at(weekday-str)
 }
 
-#let month-name = (month, ..args) => {
-  let lang = "en"
-  let upper = false
-  for arg in args.pos() {
-    if type(arg) == str {
-      lang = arg
-    } else if type(arg) == bool {
-      upper = arg
-    }
-  }
-  let month-to-str = str(month)
-  let name = month-names.at(lang).at(month-to-str)
-  if upper {
-    return first-letter-to-upper(name)
-  } else {
-    return name
-  }
+#let get-month-name = (
+  month,
+  lang: "en",
+  type: "stand-alone", // "format" or "stand-alone"
+  width: "wide", // "wide", "abbreviated", "narrow"
+) => {
+  // Convert to string for TOML key lookup (CLDR months are 1-based)
+  let month-str = str(month)
+  data.at(lang).at("months").at(type).at(width).at(month-str)
 }
