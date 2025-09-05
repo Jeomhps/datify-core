@@ -18,6 +18,10 @@ def normalize_babel_locale(locale):
     except:
         return None
 
+def kebab_case_locale(babel_locale):
+    # Turns en_US -> en-us, zh_Hant_TW -> zh-hant-tw, etc.
+    return babel_locale.replace("_", "-").lower()
+
 def get_typst_day_dict(locale, width, context):
     babel_days = get_day_names(width, context=context, locale=locale)
     days = [babel_days.get(i, "") for i in range(7)]  # 0=Mon ... 6=Sun
@@ -42,7 +46,6 @@ def write_table(section, d, lines):
         lines.append(f'{k} = "{v}"\n')
 
 def main():
-    # Get all available locales from Babel
     locales = sorted(locale_identifiers())
     new_toml_lines = []
     for lang in locales:
@@ -50,12 +53,13 @@ def main():
         if not babel_locale:
             print(f"Skipping unknown locale: {lang}")
             continue
+        toml_locale = kebab_case_locale(babel_locale)
         # Days (weekdays)
         for typ in ["format", "stand-alone"]:
             for width in ["wide", "abbreviated", "narrow"]:
                 try:
                     day_dict = get_typst_day_dict(babel_locale, width, typ)
-                    section = f"{lang}.days.{typ}.{width}"
+                    section = f"{toml_locale}.days.{typ}.{width}"
                     write_table(section, day_dict, new_toml_lines)
                 except Exception as e:
                     print(f"Failed days for {lang} {typ} {width}: {e}")
@@ -64,14 +68,14 @@ def main():
             for width in ["wide", "abbreviated", "narrow"]:
                 try:
                     month_dict = get_typst_month_dict(babel_locale, width, typ)
-                    section = f"{lang}.months.{typ}.{width}"
+                    section = f"{toml_locale}.months.{typ}.{width}"
                     write_table(section, month_dict, new_toml_lines)
                 except Exception as e:
                     print(f"Failed months for {lang} {typ} {width}: {e}")
         # Patterns
         try:
             patterns = get_babel_patterns(babel_locale)
-            section = f"{lang}.patterns"
+            section = f"{toml_locale}.patterns"
             write_table(section, patterns, new_toml_lines)
         except Exception as e:
             print(f"Failed patterns for {lang}: {e}")
