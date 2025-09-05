@@ -1,0 +1,51 @@
+name: Test Datify-Core
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Typst CLI
+        run: |
+          curl -L https://github.com/typst/typst/releases/download/v0.13.1/typst-x86_64-unknown-linux-musl.tar.xz -o typst.tar.xz
+          tar -xf typst.tar.xz
+          sudo mv typst-x86_64-unknown-linux-musl/typst /usr/local/bin/
+          typst --version
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install Python dependencies for coverage generation
+        run: |
+          python -m pip install --upgrade pip
+          pip install toml Babel
+
+      - name: Generate Typst coverage tests
+        run: |
+          cd tests
+          python test.py
+          cd ..
+
+      - name: Install datify-core as a local Typst package
+        run: |
+          mkdir -p ~/.local/share/typst/packages/local/datify-core/1.0.0
+          cp -r ./* ~/.local/share/typst/packages/local/datify-core/1.0.0/
+
+      - name: Run Typst tests
+        run: |
+          cd tests
+          chmod +x compile_all_test.sh
+          ./compile_all_test.sh
