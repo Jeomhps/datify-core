@@ -1,5 +1,3 @@
-#import "utils.typ": first-letter-to-upper, pad
-
 #let data = toml("translations/data.generated.toml")
 
 #let get-day-name = (
