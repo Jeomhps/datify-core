@@ -1,2 +1,2 @@
-#import "translations.typ": day-name, month-name
-#import "utils.typ": first-letter-to-upper, safe-slice, pad
+#import "translations.typ": *
+#import "utils.typ": first-letter-to-upper, pad, safe-slice
