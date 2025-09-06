@@ -17,19 +17,27 @@ jobs:
           python-version: "3.11"
 
       - name: Download CLDR JSON
-        run: |
-          git clone https://github.com/unicode-org/cldr-json.git
+        run: git clone https://github.com/unicode-org/cldr-json.git
 
       - name: Install deps
         run: pip install tomli
 
       - name: Generate TOML
         run: |
-          pwd
           python tools/generate_cldr_db.py cldr-json/cldr-json/cldr-dates-full/main/ all_locales_dates.toml
 
-      - name: Upload TOML Artifact
-        uses: actions/upload-artifact@v4
+      - name: Move generated TOML to translations folder
+        run: |
+          mkdir -p src/translations
+          mv all_locales_dates.toml src/translations/all_locales_dates.toml
+
+      - name: Create Pull Request with updated translations
+        uses: peter-evans/create-pull-request@v6
         with:
-          name: all_locales_dates
-          path: all_locales_dates.toml
+          commit-message: "chore: update CLDR translations TOML"
+          branch: cldr-auto-update
+          title: "chore: update CLDR translations TOML"
+          body: |
+            Automated update of CLDR translations TOML from latest CLDR release.
+          add-paths: |
+            src/translations/all_locales_dates.toml
