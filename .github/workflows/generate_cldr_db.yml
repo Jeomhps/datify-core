@@ -26,6 +26,10 @@ jobs:
         run: |
           python tools/generate_cldr_db.py cldr-json/cldr-json/cldr-dates-full/main/ cldr-dates.toml
 
+      - name: Patch wide days in TOML
+        run: |
+          python tools/patch_wide_days.py cldr-dates.toml
+
       - name: Move generated TOML to translations folder
         run: |
           mkdir -p src/translations
