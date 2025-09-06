@@ -96074,7 +96074,7 @@ short = "dd/MM/y"
 7 = "Я"
 
 [tg.days.stand-alone.wide]
-1 = "Душанбе"
+1 = "test"
 2 = "Сешанбе"
 3 = "Чоршанбе"
 4 = "Панҷшанбе"
@@ -106413,4 +106413,3 @@ full = "EEEE, MMMM d, y"
 long = "MMMM d, y"
 medium = "MMM d, y"
 short = "M/d/yy"
-
