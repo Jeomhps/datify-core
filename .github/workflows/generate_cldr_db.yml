@@ -24,7 +24,9 @@ jobs:
         run: pip install tomli
 
       - name: Generate TOML
-        run: python /tools/cldr_dates_to_big_toml.py /cldr-json/cldr-json/cldr-dates-full/main/ all_locales_dates.toml
+        run: |
+          pwd
+          python tools/generate_cldr_db.py cldr-json/cldr-json/cldr-dates-full/main/ all_locales_dates.toml
 
       - name: Upload TOML Artifact
         uses: actions/upload-artifact@v4
