@@ -30,6 +30,10 @@ jobs:
         run: |
           python tools/patch_wide_days.py cldr-dates.toml
 
+      - name: Patch wide months in TOML
+        run: |
+          python tools/patch_wide_months.py cldr-dates.toml
+
       - name: Move generated TOML to translations folder
         run: |
           mkdir -p src/translations
