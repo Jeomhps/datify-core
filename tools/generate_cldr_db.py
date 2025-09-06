@@ -16,7 +16,7 @@ def is_placeholder(val):
 
 def write_toml_section(f, section, entries, locale):
     keys = list(entries.keys())
-    weekday_order = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+    weekday_order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
     # Months: keys are digits
     if all(str(k).isdigit() for k in keys):
         real_count = sum(1 for v in entries.values() if not is_placeholder(v) or locale == "en")
