@@ -1,4 +1,4 @@
-#let data = toml("translations/data.generated.toml")
+#let data = toml("translations/cldr-dates.toml")
 
 #let get-day-name = (
   weekday,

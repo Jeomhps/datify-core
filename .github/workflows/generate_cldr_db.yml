@@ -24,12 +24,12 @@ jobs:
 
       - name: Generate TOML
         run: |
-          python tools/generate_cldr_db.py cldr-json/cldr-json/cldr-dates-full/main/ all_locales_dates.toml
+          python tools/generate_cldr_db.py cldr-json/cldr-json/cldr-dates-full/main/ cldr-dates.toml
 
       - name: Move generated TOML to translations folder
         run: |
           mkdir -p src/translations
-          mv all_locales_dates.toml src/translations/all_locales_dates.toml
+          mv cldr-dates.toml src/translations/cldr-dates.toml
 
       - name: Create Pull Request with updated translations
         uses: peter-evans/create-pull-request@v6
