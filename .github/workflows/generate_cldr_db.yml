@@ -34,6 +34,7 @@ jobs:
       - name: Create Pull Request with updated translations
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ secrets.GH_PUSH_TOKEN }}
           commit-message: "chore: update CLDR translations TOML"
           branch: cldr-auto-update
           title: "chore: update CLDR translations TOML"
