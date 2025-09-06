@@ -35,7 +35,7 @@ def process_locale(cldr_dir, locale, tomlfile):
     # Days
     day_types = ["format", "stand-alone"]
     widths = ["wide", "abbreviated", "narrow"]
-    weekday_order = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+    weekday_order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
     for typ in day_types:
         for width in widths:
             path = ["days", typ, width]
