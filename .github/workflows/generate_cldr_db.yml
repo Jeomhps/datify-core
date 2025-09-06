@@ -41,4 +41,4 @@ jobs:
           body: |
             Automated update of CLDR translations TOML from latest CLDR release.
           add-paths: |
-            src/translations/all_locales_dates.toml
+            src/translations/cldr-dates.toml
