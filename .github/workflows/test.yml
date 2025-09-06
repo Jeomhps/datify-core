@@ -1,13 +1,13 @@
 name: Test Datify-Core
 
 on:
+  workflow_dispatch:
   # push:
   #   branches:
   #     - "**"
   # pull_request:
   #   branches:
   #     - "**"
-  workflow_dispatch:
 
 jobs:
   test:
@@ -25,14 +25,18 @@ jobs:
           typst --version
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
       - name: Install Python dependencies for coverage generation
         run: |
           python -m pip install --upgrade pip
-          pip install toml Babel
+          pip install toml
+
+      - name: Clone CLDR JSON
+        run: |
+          git clone https://github.com/unicode-org/cldr-json.git
 
       - name: Generate Typst coverage tests
         run: |
