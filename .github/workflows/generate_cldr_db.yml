@@ -1,0 +1,33 @@
+name: CLDR TOML Pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 1 * *" # run monthly
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download CLDR JSON
+        run: |
+          git clone https://github.com/unicode-org/cldr-json.git
+
+      - name: Install deps
+        run: pip install tomli
+
+      - name: Generate TOML
+        run: python /tools/cldr_dates_to_big_toml.py /cldr-json/cldr-json/cldr-dates-full/main/ all_locales_dates.toml
+
+      - name: Upload TOML Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: all_locales_dates
+          path: all_locales_dates.toml
