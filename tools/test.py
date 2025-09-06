@@ -2,7 +2,7 @@ import toml
 import json
 from pathlib import Path
 
-DATA_TOML_PATH = Path("../src/translations/data.generated.toml")
+DATA_TOML_PATH = Path("../src/translations/cldr-dates.toml")
 CLDR_PATH = Path("../cldr-json/cldr-json/cldr-dates-full/main")
 TYPST_OUT = Path("../tests/test_generated.typ")
 
