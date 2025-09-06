@@ -3,7 +3,7 @@ from babel.dates import get_day_names, get_month_names, get_date_format
 from pathlib import Path
 
 DATA_TOML_PATH = Path("../src/translations/data.generated.toml")
-TYPST_OUT = Path("./test_generated.typ")
+TYPST_OUT = Path("../tests/test_generated.typ")
 
 def normalize_babel_locale(locale):
     parts = locale.replace('-', '_').split('_')
