@@ -39,7 +39,7 @@ If you need high-quality, up-to-date, and standards-based date strings for any s
 Install with Typst’s package manager or from preview:
 
 ```typst
-#import "@preview/datify-core:0.1.0": *
+#import "@preview/datify-core:1.0.0": *
 ```
 (Replace version as needed.)
 
