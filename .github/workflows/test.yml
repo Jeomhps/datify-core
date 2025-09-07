@@ -37,7 +37,7 @@ jobs:
       - name: Generate Typst coverage tests
         run: |
           cd tools
-          python test.py
+          python generate_golden_test.py
           cd ..
 
       - name: Install tytanic
