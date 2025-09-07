@@ -1,5 +1,60 @@
 # datify-core
-Datify-core provides foundational localization data and utilities for date formatting in Typst. It supplies multilingual month and day names, as well as essential helper functions for date-related text processing. Designed for use with the datify package, but reusable in any Typst project needing internationalized date language resources.
+
+**Datify-core** is an API library providing foundational localization data and functions for date formatting, based directly on Unicode CLDR data (sourced from [cldr-json](https://github.com/unicode-org/cldr-json)). It is designed to power [Datify](https://github.com/Jeomhps/datify), but can be used in any Typst project that requires internationalized month and day names or locale-specific date patterns.
+
+Whether you are building a date formatting tool, localization framework, or simply need high-quality, standards-based date strings in any supported language, datify-core is your essential backend.
+
+---
+
+## Features
+
+- **Full CLDR Coverage:** Hundreds of languages and regional variants for months, weekdays, and patterns.
+- **Simple API:** Lookup day/month names and date patterns by locale, usage, and width.
+- **Extensible & Updatable:** Data auto-synced from [cldr-json](https://github.com/unicode-org/cldr-json) and easily extended for new locales or custom needs.
+- **Reusable:** Designed for Datify, but works in any Typst project.
+
+---
+
+## Installation
+
+Add datify-core to your Typst project using Typst’s package manager or from preview:
+
+```typst
+#import "@preview/datify-core:0.1.0": *
+```
+
+(Replace version as needed.)
+
+---
+
+## API Reference
+
+| Function           | Description                                                                 | Parameters                                                                                                                                                                | Example Call                                                                                      | Example Output      |
+|--------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|---------------------|
+| `get-day-name`     | Get localized name of a weekday.                                            | `weekday`: int or str (1–7);<br>`lang`: str (locale, e.g. "en");<br>`usage`: "stand-alone" or "format";<br>`width`: "wide", "abbreviated", "narrow"                      | `get-day-name(1, lang: "fr", usage: "stand-alone", width: "wide")`                               | "lundi"             |
+| `get-month-name`   | Get localized name of a month.                                              | `month`: int or str (1–12);<br>`lang`: str;<br>`usage`: "stand-alone" or "format";<br>`width`: "wide", "abbreviated", "narrow"                                           | `get-month-name(2, lang: "en", usage: "format", width: "abbreviated")`                           | "Feb"               |
+| `get-date-pattern` | Get a locale's date pattern or a custom pattern string.                     | `pattern_type`: str ("full", "long", "medium", "short", or custom format string);<br>`lang`: str                                                                         | `get-date-pattern("medium", lang: "de")`                                                         | "dd.MM.y"           |
+
+### Parameter Values
+
+#### `usage`
+- `"stand-alone"`: Used when the day/month appears alone (e.g., calendar headers).
+- `"format"`: Used in formatted dates.
+
+#### `width`
+- `"wide"`: Full name (e.g., "Monday")
+- `"abbreviated"`: Short name (e.g., "Mon")
+- `"narrow"`: Letter or shortest form (e.g., "M")
+
+#### `pattern_type`
+- `"full"`, `"long"`, `"medium"`, `"short"`: Standard CLDR patterns.
+- Any custom pattern string (e.g., `"yyyy/MM/dd"`).
+
+---
+
+## Supported Locales
+
+Coverage is based on the upstream CLDR dataset. Below is the full list of supported locales and their coverage:
 
 <!--locale-dashboard-start-->
 
@@ -746,3 +801,24 @@ Datify-core provides foundational localization data and utilities for date forma
 | `zu` | 🟩 100.0% | 114/114 |
 
 <!--locale-dashboard-end-->
+
+---
+
+## Contributing
+
+- To add or update CLDR data, see [cldr-json](https://github.com/unicode-org/cldr-json).
+- Pull requests are welcome for bug fixes, locale improvements, or API enhancements.
+
+---
+
+## License
+
+MIT © 2025 Jeomhps
+CLDR data © Unicode, Inc., used under the [Unicode License](https://unicode.org/copyright.html).
+
+---
+
+## Credits
+
+- [Unicode CLDR Project](https://cldr.unicode.org/)
+- [cldr-json](https://github.com/unicode-org/cldr-json)
