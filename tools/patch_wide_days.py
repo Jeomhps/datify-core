@@ -14,7 +14,7 @@ abbr_to_wide = {
 
 weekday_order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 abbrs = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-wide = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+wide = ["D01", "DO2", "D03", "D04", "D05", "D06", "D07"]
 
 def patch_file(toml_path):
     with open(toml_path, "r", encoding="utf-8") as f:
