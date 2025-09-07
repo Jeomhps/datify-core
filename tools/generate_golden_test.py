@@ -18,7 +18,7 @@ def gen_day_name_tests(lang, lang_toml):
                     continue
                 val = toml_days[str(typst_weekday)].replace('"', '\\"')
                 tests.append(
-                    f'#assert(get-day-name({typst_weekday}, lang: "{lang}", type: "{typ}", width: "{width}") == "{val}")'
+                    f'#assert(get-day-name({typst_weekday}, lang: "{lang}", usage: "{typ}", width: "{width}") == "{val}")'
                 )
     return tests
 
@@ -36,7 +36,7 @@ def gen_month_name_tests(lang, lang_toml):
                     continue
                 val = toml_months[str(month)].replace('"', '\\"')
                 tests.append(
-                    f'#assert(get-month-name({month}, lang: "{lang}", type: "{typ}", width: "{width}") == "{val}")'
+                    f'#assert(get-month-name({month}, lang: "{lang}", usage: "{typ}", width: "{width}") == "{val}")'
                 )
     return tests
 
