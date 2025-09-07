@@ -13,19 +13,15 @@ SECTION_PATTERNS = [
 
 def get_fake_set(is_day, section_type):
     if is_day:
-        if section_type == "narrow":
-            # For narrow, only explicit placeholders are fake
-            return {"D01", "D02", "D03", "D04", "D05", "D06", "D07"}
-        else:
-            # For wide/abbreviated, include English abbreviations as placeholders too
-            return {"D01", "D02", "D03", "D04", "D05", "D06", "D07", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
+        # All days sections use D01-D07 as placeholders
+        return {"D01", "D02", "D03", "D04", "D05", "D06", "D07"}
     else:
         if section_type == "narrow":
-            # For narrow, only explicit placeholders are fake
-            return set(["M%02d" % i for i in range(1, 13)])
+            # For months.narrow and months.stand-alone.narrow: 1-12 are placeholders
+            return set(str(i) for i in range(1, 13))
         else:
-            # For wide/abbreviated, include explicit placeholders and numbers
-            return set(["M%02d" % i for i in range(1, 13)]) | set(str(i) for i in range(1, 13))
+            # For all other months sections: M01-M12 are placeholders
+            return set("M%02d" % i for i in range(1, 13))
 
 def parse_toml_sections():
     with open(TOML_PATH, "r", encoding="utf-8") as f:
