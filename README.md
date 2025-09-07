@@ -1,8 +1,11 @@
 # datify-core
 
-**Datify-core** is an API library that provides foundational localization data and patterns for date formatting, powered directly by Unicode CLDR data ([cldr-json](https://github.com/unicode-org/cldr-json)) and designed for Typst. It is the backend for [Datify](https://github.com/Jeomhps/datify), but is reusable in any Typst project needing localized month and day names or locale-specific date patterns.
+**Datify-core** is an API library that provides foundational localization data and patterns to format dates, powered directly by Unicode CLDR data ([cldr-json](https://github.com/unicode-org/cldr-json)) and designed for Typst. It is the backend for [Datify](https://github.com/Jeomhps/datify), but is reusable in any Typst project needing localized month and day names or locale-specific date patterns.
 
 If you need high-quality, up-to-date, and standards-based date strings for any supported language, whether for a date formatting tool, localization system, or any Typst workflow, **datify-core** is your solution.
+
+> **Data quality**:
+> All locale data is sourced from [cldr-json](https://github.com/unicode-org/cldr-json), which only includes CLDR data that has achieved `draft="contributed"` or `draft="approved"` status. This is the same threshold used by ICU (International Components for Unicode), ensuring high reliability and coverage.
 
 ---
 
