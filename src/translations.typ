@@ -3,30 +3,45 @@
 #let get-day-name = (
   weekday,
   lang: "en",
-  type: "stand-alone",
+  usage: "stand-alone",
   width: "wide",
 ) => {
-  if weekday < 1 or weekday > 7 {
-    panic("Invalid weekday: " + str(weekday) + " (must be 1–7)")
+  let weekday_type = type(weekday)
+
+  // Only accept int or str
+  if not (weekday_type == int or weekday_type == str) {
+    panic("Invalid weekday type: must be an integer or a string, got " + str(type(weekday)))
+  } else {
+    if weekday_type == int {
+      if not (weekday >= 1 and weekday <= 7) {
+        panic("Invalid weekday: " + str(weekday) + " (must be 1–7)")
+      }
+    } else {
+      if not (weekday >= "1" and weekday <= "7") {
+        panic("Invalid weekday: " + weekday + " (must be \"1\"–\"7\")")
+      }
+    }
   }
+
+  let weekday_str = str(weekday)
+
   if not data.keys().contains(lang) {
     panic("Unknown language: " + lang)
   }
   let days = data.at(lang).at("days")
-  if not days.keys().contains(type) {
-    panic("Invalid day type: " + type + " (must be 'format' or 'stand-alone')")
+  if not days.keys().contains(usage) {
+    panic("Invalid day usage: " + usage + " (must be 'format' or 'stand-alone')")
   }
-  let day_type = days.at(type)
-  if not day_type.keys().contains(width) {
+  let day_usage = days.at(usage)
+  if not day_usage.keys().contains(width) {
     panic("Invalid day width: " + width + " (must be 'wide', 'abbreviated', 'narrow')")
   }
-  let width_map = day_type.at(width)
-  let weekday_str = str(weekday)
+  let width_map = day_usage.at(width)
   if not width_map.keys().contains(weekday_str) {
     panic(
-      "No day name for weekday " + str(weekday) +
+      "No day name for weekday " + weekday_str +
       " in language " + lang +
-      ", type " + type +
+      ", usage " + usage +
       ", width " + width
     )
   }
@@ -36,30 +51,45 @@
 #let get-month-name = (
   month,
   lang: "en",
-  type: "stand-alone", // "format" or "stand-alone"
+  usage: "stand-alone", // "format" or "stand-alone"
   width: "wide", // "wide", "abbreviated", "narrow"
 ) => {
-  if month < 1 or month > 12 {
-    panic("Invalid month: " + str(month) + " (must be 1–12)")
+  let month_type = type(month)
+
+  // Only accept int or str
+  if not (month_type == int or month_type == str) {
+    panic("Invalid month type: must be an integer or a string, got " + str(type(month)))
+  } else {
+    if month_type == int {
+      if not (month >= 1 and month <= 12) {
+        panic("Invalid month: " + str(month) + " (must be 1–12)")
+      }
+    } else {
+      if not (month >= "1" and month <= "12") {
+        panic("Invalid month: " + month + " (must be \"1\"–\"12\")")
+      }
+    }
   }
+
+  let month_str = str(month)
+
   if not data.keys().contains(lang) {
     panic("Unknown language: " + lang)
   }
   let months = data.at(lang).at("months")
-  if not months.keys().contains(type) {
-    panic("Invalid month type: " + type + " (must be 'format' or 'stand-alone')")
+  if not months.keys().contains(usage) {
+    panic("Invalid month usage: " + usage + " (must be 'format' or 'stand-alone')")
   }
-  let month_type = months.at(type)
-  if not month_type.keys().contains(width) {
+  let month_usage = months.at(usage)
+  if not month_usage.keys().contains(width) {
     panic("Invalid month width: " + width + " (must be 'wide', 'abbreviated', 'narrow')")
   }
-  let width_map = month_type.at(width)
-  let month_str = str(month)
+  let width_map = month_usage.at(width)
   if not width_map.keys().contains(month_str) {
     panic(
-      "No month name for month " + str(month) +
+      "No month name for month " + month_str +
       " in language " + lang +
-      ", type " + type +
+      ", usage " + usage +
       ", width " + width
     )
   }
@@ -74,11 +104,13 @@
     panic("Unknown language: " + lang)
   }
   let patterns = data.at(lang).at("patterns")
-  if not patterns.keys().contains(pattern_type) {
-    panic(
-      "Invalid pattern type: " + pattern_type +
-      " (must be 'full', 'long', 'medium', 'short')"
-    )
+  // If pattern_type is a known key, return the pattern from data.
+  // Otherwise, if a string, treat as custom pattern and return as-is.
+  if patterns.keys().contains(pattern_type) {
+    patterns.at(pattern_type)
+  } else if (type(pattern_type) == str) {
+    pattern_type
+  } else {
+    panic("Invalid pattern type: must be a string or a known pattern key, got " + str(type(pattern_type)))
   }
-  patterns.at(pattern_type)
 }
