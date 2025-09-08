@@ -1,1 +1,1 @@
-#import "translations.typ": get-day-name(), get-months-names(), get-date-pattern()
+#import "translations.typ": get-day-name, get-months-names, get-date-pattern
