@@ -22,4 +22,3 @@
 #get-date-pattern("long", lang: "en")
 #get-date-pattern("medium", lang: "en")
 #get-date-pattern("short", lang: "en")
-#get-date-pattern("yyyy/MM/dd", lang: "en")

@@ -125,10 +125,18 @@
 // get-month-name: Valid for both int and string (should match)
 #assert.eq(get-month-name(1, lang: "en"), get-month-name("1", lang: "en"))
 
-// get-date-pattern: Returns built-in pattern for standard keys, custom pattern string as-is otherwise
+// get-date-pattern: Returns built-in pattern for standard keys, panics otherwise
 #assert.eq(get-date-pattern("full", lang: "en"), get-date-pattern("full", lang: "en"))
-#assert.eq(get-date-pattern("yyyy-MM-dd", lang: "en"), "yyyy-MM-dd")
-#assert.eq(get-date-pattern("EEE 'day'", lang: "en"), "EEE 'day'")
+#assert-panic(() => get-date-pattern("yyyy-MM-dd", lang: "en"))
+#assert.eq(
+  catch(() => get-date-pattern("yyyy-MM-dd", lang: "en")),
+  "panicked with: \"Unknown pattern type: yyyy-MM-dd (must be one of full, long, medium, short)\""
+)
+#assert-panic(() => get-date-pattern("EEE 'day'", lang: "en"))
+#assert.eq(
+  catch(() => get-date-pattern("EEE 'day'", lang: "en")),
+  "panicked with: \"Unknown pattern type: EEE 'day' (must be one of full, long, medium, short)\""
+)
 
 // get-date-pattern: Invalid language
 #assert-panic(() => get-date-pattern("short", lang: "zz"))
@@ -141,10 +149,10 @@
 #assert-panic(() => get-date-pattern((1, 2), lang: "en"))
 #assert.eq(
   catch(() => get-date-pattern((1, 2), lang: "en")),
-  "panicked with: \"Invalid pattern type: must be a string or a known pattern key, got array\""
+  "panicked with: \"Invalid pattern type: must be a string and a known pattern key, got array\""
 )
 #assert-panic(() => get-date-pattern(auto, lang: "en"))
 #assert.eq(
   catch(() => get-date-pattern(auto, lang: "en")),
-  "panicked with: \"Invalid pattern type: must be a string or a known pattern key, got auto\""
+  "panicked with: \"Invalid pattern type: must be a string and a known pattern key, got auto\""
 )
