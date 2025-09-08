@@ -45,7 +45,7 @@
       ", width " + width
     )
   }
-  width_map.at(weekday_str)
+  return width_map.at(weekday_str)
 }
 
 #let get-month-name = (
@@ -93,7 +93,7 @@
       ", width " + width
     )
   }
-  width_map.at(month_str)
+  return width_map.at(month_str)
 }
 
 #let get-date-pattern = (
@@ -107,9 +107,9 @@
   // If pattern_type is a known key, return the pattern from data.
   // Otherwise, if a string, treat as custom pattern and return as-is.
   if patterns.keys().contains(pattern-type) {
-    patterns.at(pattern-type)
+    return patterns.at(pattern-type)
   } else if (type(pattern-type) == str) {
-    pattern-type
+    return pattern-type
   } else {
     panic("Invalid pattern type: must be a string or a known pattern key, got " + str(type(pattern-type)))
   }
