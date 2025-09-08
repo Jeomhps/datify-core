@@ -59,7 +59,7 @@ def main():
     langs = list(data.keys())
     with open(TYPST_OUT, "w", encoding="utf-8") as f:
         f.write("// Auto-generated tests for data.toml langs (no CLDR JSON)\n")
-        f.write('#import "/src/translations.typ": get-day-name, get-month-name, get-date-pattern\n\n')
+        f.write('#import "/src/main.typ": *\n\n')
         for lang in langs:
             lang_toml = data[lang]
             f.write(f"// Tests for {lang}\n")

@@ -7,7 +7,7 @@
 // For example: `panic("foo")` will be caught as the string: panicked with: "foo"
 //              (including the quotes)
 
-#import "/src/translations.typ": get-day-name, get-month-name, get-date-pattern
+#import "/src/main.typ": get-day-name, get-month-name, get-date-pattern
 
 // get-day-name: Out-of-range weekday panics (int and str)
 #assert-panic(() => get-day-name(0, lang: "en"))

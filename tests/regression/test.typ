@@ -1,4 +1,4 @@
-#import "/src/translations.typ": *
+#import "/src/main.typ": *
 
 #for weekday in range(1, 8) {
   get-day-name(weekday, lang: "en", usage: "stand-alone", width: "wide")
