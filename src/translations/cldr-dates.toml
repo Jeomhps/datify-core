@@ -18860,7 +18860,7 @@ short = "d/M/yy"
 full = "EEEE, MMMM d, y"
 long = "MMMM d, y"
 medium = "MMM d, y"
-short = "M/d/yy"
+short = "M/d/y"
 
 [en-001.days.format.wide]
 1 = "Monday"
