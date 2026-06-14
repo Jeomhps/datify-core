@@ -17,7 +17,7 @@
 //
 // Output:
 //   src/translations/locales/<locale>.toml   (no locale prefix in sections)
-//   src/translations/index.toml              (authoritative locale list + coverage)
+//   src/translations/index.toml              (authoritative locale list)
 
 import {
   readFileSync,
@@ -37,9 +37,6 @@ const ROOT_LOCALE_DIR = "und"; // CLDR root, used only as the comparison baselin
 const DEFAULT_LOCALE = "en"; // terminal fallback locale, written in full
 const OUT_DIR = join(REPO, "src", "translations", "locales");
 const INDEX_PATH = join(REPO, "src", "translations", "index.toml");
-const README_PATH = join(REPO, "README.md");
-const DASHBOARD_START = "<!--locale-dashboard-start-->";
-const DASHBOARD_END = "<!--locale-dashboard-end-->";
 
 const USAGES = ["format", "stand-alone"];
 const WIDTHS = ["wide", "abbreviated", "narrow"];
@@ -47,9 +44,6 @@ const WIDTHS = ["wide", "abbreviated", "narrow"];
 const WEEKDAY_ORDER = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 const MONTH_KEYS = Array.from({ length: 12 }, (_, i) => String(i + 1));
 const PATTERN_KEYS = ["full", "long", "medium", "short"];
-
-// Total day+month cells per locale (patterns excluded), for coverage.
-const TOTAL_CELLS = USAGES.length * WIDTHS.length * (7 + 12); // 114
 
 function readGregorian(locale) {
   const p = join(CLDR_MAIN, locale, "ca-gregorian.json");
@@ -103,12 +97,8 @@ function isLocalized(value, rootValue) {
 
 // Build the TOML body for one locale. When keepAll is true (default locale),
 // every present value is written regardless of root equality.
-// Returns { toml, count } where count is the number of day+month cells actually
-// written (presence-based coverage): for non-default locales that equals the
-// localized count, and the default locale is written in full so it scores 100%.
 function buildToml(view, root, keepAll) {
   let out = "";
-  let count = 0;
 
   const emitNumbered = (category, keysSpec) => {
     for (const usage of USAGES) {
@@ -121,7 +111,6 @@ function buildToml(view, root, keepAll) {
           if (v === undefined) continue;
           if (keepAll || isLocalized(v, rootCells[k])) {
             lines.push(`${k} = "${esc(v)}"`);
-            count++;
           }
         }
         if (lines.length) {
@@ -146,50 +135,7 @@ function buildToml(view, root, keepAll) {
     out += `[patterns]\n` + plines.join("\n") + "\n\n";
   }
 
-  return { toml: out, count };
-}
-
-// README coverage dashboard. Colour buckets ported from the old
-// locale_coverage_dashboard.py so the rendered table is unchanged in shape.
-function coverageColour(pct) {
-  if (pct >= 99.5) return "🟩";
-  if (pct >= 80) return "🟨";
-  if (pct >= 40) return "🟧";
-  return "🟥";
-}
-
-function buildDashboard(locales, coveredCount) {
-  const rows = locales.map((l) => {
-    const covered = coveredCount[l];
-    const pct = (covered / TOTAL_CELLS) * 100;
-    return `| \`${l}\` | ${coverageColour(pct)} ${pct.toFixed(1)}% | ${covered}/${TOTAL_CELLS} |`;
-  });
-  return (
-    "| Locale | Coverage | Localized/Total |\n" +
-    "|--------|----------|-----------------|\n" +
-    rows.join("\n")
-  );
-}
-
-function updateReadme(dashboard) {
-  if (!existsSync(README_PATH)) return false;
-  const content = readFileSync(README_PATH, "utf8");
-  const start = content.indexOf(DASHBOARD_START);
-  const end = content.indexOf(DASHBOARD_END);
-  if (start === -1 || end === -1) {
-    console.warn(
-      `README markers not found (${DASHBOARD_START} / ${DASHBOARD_END}); skipping README update.`,
-    );
-    return false;
-  }
-  const next =
-    content.slice(0, start + DASHBOARD_START.length) +
-    "\n\n" +
-    dashboard +
-    "\n\n" +
-    content.slice(end);
-  writeFileSync(README_PATH, next, "utf8");
-  return true;
+  return out;
 }
 
 function main() {
@@ -218,32 +164,20 @@ function main() {
   rmSync(OUT_DIR, { recursive: true, force: true });
   mkdirSync(OUT_DIR, { recursive: true });
 
-  const coverage = {};
-  const coveredCount = {};
   for (const locale of locales) {
     const greg = readGregorian(locale);
     const view = extract(greg);
     const keepAll = locale === DEFAULT_LOCALE;
-    const { toml, count } = buildToml(view, root, keepAll);
+    const toml = buildToml(view, root, keepAll);
     writeFileSync(join(OUT_DIR, `${locale}.toml`), toml, "utf8");
-    coveredCount[locale] = count;
-    coverage[locale] = ((count / TOTAL_CELLS) * 100).toFixed(1);
   }
 
-  // index.toml: authoritative locale list + coverage. Locale codes only contain
-  // [A-Za-z0-9-], all valid TOML bare keys, so no quoting is needed for keys.
-  let idx = "locales = [" + locales.map((l) => `"${l}"`).join(", ") + "]\n\n";
-  idx += "[coverage]\n";
-  for (const l of locales) {
-    idx += `${l} = ${coverage[l]}\n`;
-  }
+  // index.toml: authoritative locale list.
+  const idx = "locales = [" + locales.map((l) => `"${l}"`).join(", ") + "]\n";
   writeFileSync(INDEX_PATH, idx, "utf8");
-
-  const readmeUpdated = updateReadme(buildDashboard(locales, coveredCount));
 
   console.log(`Wrote ${locales.length} locale files to ${OUT_DIR}`);
   console.log(`Wrote ${INDEX_PATH}`);
-  console.log(readmeUpdated ? `Updated ${README_PATH}` : `README not updated`);
 }
 
 main();

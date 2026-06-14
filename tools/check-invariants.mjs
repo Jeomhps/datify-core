@@ -11,7 +11,6 @@
 //   3. No leftover root sentinels (D01..D07 / M01..M12) survive anywhere.
 //   4. The default locale ("en") is complete, so the fallback chain always has
 //      a value to land on.
-//   5. Coverage is present for every locale and within [0, 100].
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -55,26 +54,15 @@ function parseSections(text) {
 
 function parseIndex(text) {
   const locales = [];
-  const coverage = {};
-  let inCoverage = false;
   for (const raw of text.split(/\r?\n/)) {
     const line = raw.trim();
     if (!line || line.startsWith("#")) continue;
-    if (line === "[coverage]") {
-      inCoverage = true;
-      continue;
-    }
-    let m = line.match(/^locales\s*=\s*\[(.*)\]$/s);
+    const m = line.match(/^locales\s*=\s*\[(.*)\]$/s);
     if (m) {
       for (const s of m[1].matchAll(/"([^"]+)"/g)) locales.push(s[1]);
-      continue;
-    }
-    if (inCoverage) {
-      m = line.match(/^(\S+)\s*=\s*([0-9.]+)$/);
-      if (m) coverage[m[1]] = parseFloat(m[2]);
     }
   }
-  return { locales, coverage };
+  return { locales };
 }
 
 // --- load index ---
@@ -82,7 +70,7 @@ if (!existsSync(INDEX_PATH)) {
   console.error("FAIL: index.toml not found");
   process.exit(1);
 }
-const { locales, coverage } = parseIndex(readFileSync(INDEX_PATH, "utf8"));
+const { locales } = parseIndex(readFileSync(INDEX_PATH, "utf8"));
 if (locales.length === 0) fail("index.toml lists no locales");
 
 // --- index <-> files agree ---
@@ -149,13 +137,6 @@ if (!existsSync(defPath)) {
     if (!def.patterns || def.patterns[k] === undefined)
       fail(`default locale incomplete: [patterns] missing "${k}"`);
   }
-}
-
-// --- coverage present and in range ---
-for (const l of locales) {
-  const c = coverage[l];
-  if (c === undefined) fail(`coverage missing for "${l}"`);
-  else if (c < 0 || c > 100) fail(`coverage out of range for "${l}": ${c}`);
 }
 
 if (errors.length) {

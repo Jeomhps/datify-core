@@ -20,7 +20,7 @@ jobs:
       - name: Install pinned CLDR data
         run: npm ci
 
-      - name: Generate per-locale data + index + README coverage
+      - name: Generate per-locale data + index
         run: node tools/generate-cldr.mjs
 
       - name: Create Pull Request with updated data
@@ -31,8 +31,7 @@ jobs:
           branch: cldr-auto-update
           title: "chore: regenerate CLDR data"
           body: |
-            Automated regeneration of CLDR per-locale data, index, and README
-            coverage from the pinned `cldr-dates-full` version in package.json.
+            Automated regeneration of CLDR per-locale data and index from the
+            pinned `cldr-dates-full` version in package.json.
           add-paths: |
             src/translations/**
-            README.md
