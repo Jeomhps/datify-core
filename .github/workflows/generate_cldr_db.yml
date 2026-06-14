@@ -1,48 +1,38 @@
-name: CLDR TOML Pipeline
+name: CLDR Data Pipeline
 
+# Manual, reproducible regeneration. The data only changes when the pinned
+# cldr-dates-full version in package.json is bumped, so there is no cron: run
+# this workflow after bumping the dependency.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 1 * *" # run monthly
 
 jobs:
-  build:
+  generate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Python
-        uses: actions/setup-python@v5
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          python-version: "3.11"
+          node-version: "20"
 
-      - name: Download CLDR JSON
-        run: git clone https://github.com/unicode-org/cldr-json.git
+      - name: Install pinned CLDR data
+        run: npm ci
 
-      - name: Install deps
-        run: pip install tomli
+      - name: Generate per-locale data + index + README coverage
+        run: node tools/generate-cldr.mjs
 
-      - name: Generate TOML
-        run: |
-          python tools/generate_cldr_db.py cldr-json/cldr-json/cldr-dates-full/main/ cldr-dates.toml
-
-      - name: Patch wide days in TOML
-        run: |
-          python tools/patch_wide_days.py cldr-dates.toml
-
-      - name: Move generated TOML to translations folder
-        run: |
-          mkdir -p src/translations
-          mv cldr-dates.toml src/translations/cldr-dates.toml
-
-      - name: Create Pull Request with updated translations
+      - name: Create Pull Request with updated data
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GH_PUSH_TOKEN }}
-          commit-message: "chore: update CLDR translations TOML"
+          commit-message: "chore: regenerate CLDR data"
           branch: cldr-auto-update
-          title: "chore: update CLDR translations TOML"
+          title: "chore: regenerate CLDR data"
           body: |
-            Automated update of CLDR translations TOML from latest CLDR release.
+            Automated regeneration of CLDR per-locale data, index, and README
+            coverage from the pinned `cldr-dates-full` version in package.json.
           add-paths: |
-            src/translations/cldr-dates.toml
+            src/translations/**
+            README.md

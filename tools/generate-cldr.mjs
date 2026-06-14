@@ -37,6 +37,9 @@ const ROOT_LOCALE_DIR = "und"; // CLDR root, used only as the comparison baselin
 const DEFAULT_LOCALE = "en"; // terminal fallback locale, written in full
 const OUT_DIR = join(REPO, "src", "translations", "locales");
 const INDEX_PATH = join(REPO, "src", "translations", "index.toml");
+const README_PATH = join(REPO, "README.md");
+const DASHBOARD_START = "<!--locale-dashboard-start-->";
+const DASHBOARD_END = "<!--locale-dashboard-end-->";
 
 const USAGES = ["format", "stand-alone"];
 const WIDTHS = ["wide", "abbreviated", "narrow"];
@@ -143,6 +146,49 @@ function buildToml(view, root, keepAll) {
   return { toml: out, localized };
 }
 
+// README coverage dashboard. Colour buckets ported from the old
+// locale_coverage_dashboard.py so the rendered table is unchanged in shape.
+function coverageColour(pct) {
+  if (pct >= 99.5) return "🟩";
+  if (pct >= 80) return "🟨";
+  if (pct >= 40) return "🟧";
+  return "🟥";
+}
+
+function buildDashboard(locales, localizedCount) {
+  const rows = locales.map((l) => {
+    const localized = localizedCount[l];
+    const pct = (localized / TOTAL_CELLS) * 100;
+    return `| \`${l}\` | ${coverageColour(pct)} ${pct.toFixed(1)}% | ${localized}/${TOTAL_CELLS} |`;
+  });
+  return (
+    "| Locale | Coverage | Localized/Total |\n" +
+    "|--------|----------|-----------------|\n" +
+    rows.join("\n")
+  );
+}
+
+function updateReadme(dashboard) {
+  if (!existsSync(README_PATH)) return false;
+  const content = readFileSync(README_PATH, "utf8");
+  const start = content.indexOf(DASHBOARD_START);
+  const end = content.indexOf(DASHBOARD_END);
+  if (start === -1 || end === -1) {
+    console.warn(
+      `README markers not found (${DASHBOARD_START} / ${DASHBOARD_END}); skipping README update.`,
+    );
+    return false;
+  }
+  const next =
+    content.slice(0, start + DASHBOARD_START.length) +
+    "\n\n" +
+    dashboard +
+    "\n\n" +
+    content.slice(end);
+  writeFileSync(README_PATH, next, "utf8");
+  return true;
+}
+
 function main() {
   if (!existsSync(CLDR_MAIN)) {
     console.error(`Cannot find ${CLDR_MAIN}. Run \`npm ci\` first.`);
@@ -170,12 +216,14 @@ function main() {
   mkdirSync(OUT_DIR, { recursive: true });
 
   const coverage = {};
+  const localizedCount = {};
   for (const locale of locales) {
     const greg = readGregorian(locale);
     const view = extract(greg);
     const keepAll = locale === DEFAULT_LOCALE;
     const { toml, localized } = buildToml(view, root, keepAll);
     writeFileSync(join(OUT_DIR, `${locale}.toml`), toml, "utf8");
+    localizedCount[locale] = localized;
     coverage[locale] = ((localized / TOTAL_CELLS) * 100).toFixed(1);
   }
 
@@ -188,8 +236,11 @@ function main() {
   }
   writeFileSync(INDEX_PATH, idx, "utf8");
 
+  const readmeUpdated = updateReadme(buildDashboard(locales, localizedCount));
+
   console.log(`Wrote ${locales.length} locale files to ${OUT_DIR}`);
   console.log(`Wrote ${INDEX_PATH}`);
+  console.log(readmeUpdated ? `Updated ${README_PATH}` : `README not updated`);
 }
 
 main();
