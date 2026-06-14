@@ -1,0 +1,13 @@
+{
+  "name": "datify-core-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build tooling for the datify-core Typst package: regenerates CLDR date data from the pinned cldr-dates-full npm package.",
+  "type": "module",
+  "scripts": {
+    "generate": "node tools/generate-cldr.mjs"
+  },
+  "dependencies": {
+    "cldr-dates-full": "48.2.0"
+  }
+}
