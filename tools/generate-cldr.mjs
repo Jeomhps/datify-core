@@ -103,10 +103,12 @@ function isLocalized(value, rootValue) {
 
 // Build the TOML body for one locale. When keepAll is true (default locale),
 // every present value is written regardless of root equality.
-// Returns { toml, localized } where localized counts day+month cells kept-by-merit.
+// Returns { toml, count } where count is the number of day+month cells actually
+// written (presence-based coverage): for non-default locales that equals the
+// localized count, and the default locale is written in full so it scores 100%.
 function buildToml(view, root, keepAll) {
   let out = "";
-  let localized = 0;
+  let count = 0;
 
   const emitNumbered = (category, keysSpec) => {
     for (const usage of USAGES) {
@@ -117,9 +119,10 @@ function buildToml(view, root, keepAll) {
         for (const k of keysSpec) {
           const v = cells[k];
           if (v === undefined) continue;
-          const loc = isLocalized(v, rootCells[k]);
-          if (loc) localized++;
-          if (keepAll || loc) lines.push(`${k} = "${esc(v)}"`);
+          if (keepAll || isLocalized(v, rootCells[k])) {
+            lines.push(`${k} = "${esc(v)}"`);
+            count++;
+          }
         }
         if (lines.length) {
           out += `[${category}.${usage}.${width}]\n` + lines.join("\n") + "\n\n";
@@ -143,7 +146,7 @@ function buildToml(view, root, keepAll) {
     out += `[patterns]\n` + plines.join("\n") + "\n\n";
   }
 
-  return { toml: out, localized };
+  return { toml: out, count };
 }
 
 // README coverage dashboard. Colour buckets ported from the old
@@ -155,11 +158,11 @@ function coverageColour(pct) {
   return "🟥";
 }
 
-function buildDashboard(locales, localizedCount) {
+function buildDashboard(locales, coveredCount) {
   const rows = locales.map((l) => {
-    const localized = localizedCount[l];
-    const pct = (localized / TOTAL_CELLS) * 100;
-    return `| \`${l}\` | ${coverageColour(pct)} ${pct.toFixed(1)}% | ${localized}/${TOTAL_CELLS} |`;
+    const covered = coveredCount[l];
+    const pct = (covered / TOTAL_CELLS) * 100;
+    return `| \`${l}\` | ${coverageColour(pct)} ${pct.toFixed(1)}% | ${covered}/${TOTAL_CELLS} |`;
   });
   return (
     "| Locale | Coverage | Localized/Total |\n" +
@@ -216,15 +219,15 @@ function main() {
   mkdirSync(OUT_DIR, { recursive: true });
 
   const coverage = {};
-  const localizedCount = {};
+  const coveredCount = {};
   for (const locale of locales) {
     const greg = readGregorian(locale);
     const view = extract(greg);
     const keepAll = locale === DEFAULT_LOCALE;
-    const { toml, localized } = buildToml(view, root, keepAll);
+    const { toml, count } = buildToml(view, root, keepAll);
     writeFileSync(join(OUT_DIR, `${locale}.toml`), toml, "utf8");
-    localizedCount[locale] = localized;
-    coverage[locale] = ((localized / TOTAL_CELLS) * 100).toFixed(1);
+    coveredCount[locale] = count;
+    coverage[locale] = ((count / TOTAL_CELLS) * 100).toFixed(1);
   }
 
   // index.toml: authoritative locale list + coverage. Locale codes only contain
@@ -236,7 +239,7 @@ function main() {
   }
   writeFileSync(INDEX_PATH, idx, "utf8");
 
-  const readmeUpdated = updateReadme(buildDashboard(locales, localizedCount));
+  const readmeUpdated = updateReadme(buildDashboard(locales, coveredCount));
 
   console.log(`Wrote ${locales.length} locale files to ${OUT_DIR}`);
   console.log(`Wrote ${INDEX_PATH}`);

@@ -247,7 +247,7 @@ Coverage is based on the upstream CLDR dataset. Below is the full list of suppor
 | `el` | 🟩 100.0% | 114/114 |
 | `el-CY` | 🟩 100.0% | 114/114 |
 | `el-polyton` | 🟩 100.0% | 114/114 |
-| `en` | 🟧 75.4% | 86/114 |
+| `en` | 🟩 100.0% | 114/114 |
 | `en-001` | 🟧 75.4% | 86/114 |
 | `en-150` | 🟧 75.4% | 86/114 |
 | `en-AE` | 🟧 75.4% | 86/114 |
