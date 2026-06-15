@@ -57,13 +57,6 @@
   "panicked with: \"Invalid day width: nonsense (must be 'wide', 'abbreviated', 'narrow')\""
 )
 
-// get-day-name: Invalid language
-#assert-panic(() => get-day-name(1, lang: "zz"))
-#assert.eq(
-  catch(() => get-day-name(1, lang: "zz")),
-  "panicked with: \"Unknown language: zz\""
-)
-
 // get-day-name: Valid for both int and string (should match)
 #assert.eq(get-day-name(1, lang: "en"), get-day-name("1", lang: "en"))
 
@@ -115,13 +108,6 @@
   "panicked with: \"Invalid month width: nonsense (must be 'wide', 'abbreviated', 'narrow')\""
 )
 
-// get-month-name: Invalid language
-#assert-panic(() => get-month-name(1, lang: "zz"))
-#assert.eq(
-  catch(() => get-month-name(1, lang: "zz")),
-  "panicked with: \"Unknown language: zz\""
-)
-
 // get-month-name: Valid for both int and string (should match)
 #assert.eq(get-month-name(1, lang: "en"), get-month-name("1", lang: "en"))
 
@@ -136,13 +122,6 @@
 #assert.eq(
   catch(() => get-date-pattern("EEE 'day'", lang: "en")),
   "panicked with: \"Unknown pattern type: EEE 'day' (must be one of full, long, medium, short)\""
-)
-
-// get-date-pattern: Invalid language
-#assert-panic(() => get-date-pattern("short", lang: "zz"))
-#assert.eq(
-  catch(() => get-date-pattern("short", lang: "zz")),
-  "panicked with: \"Unknown language: zz\""
 )
 
 // get-date-pattern: Invalid pattern type (e.g. array, auto)

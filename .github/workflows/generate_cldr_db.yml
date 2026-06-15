@@ -1,48 +1,47 @@
-name: CLDR TOML Pipeline
+name: CLDR Data Pipeline
 
+# Keeps the CLDR data current automatically. On a schedule (and on demand) it
+# fetches the LATEST cldr-dates-full, bumps the exact pin in package.json, and
+# regenerates. If anything changed (a new CLDR release, or data differences) it
+# opens a PR; if nothing changed, create-pull-request is a no-op. The repo itself
+# stays pinned to an exact version, so normal builds/CI remain reproducible — the
+# PR is the review gate for every data update.
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 1 * *" # run monthly
+    - cron: "0 6 1 * *" # 06:00 UTC on the 1st of each month
 
 jobs:
-  build:
+  generate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Python
-        uses: actions/setup-python@v5
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          python-version: "3.11"
+          node-version: "20"
 
-      - name: Download CLDR JSON
-        run: git clone https://github.com/unicode-org/cldr-json.git
+      - name: Update cldr-dates-full to the latest exact version
+        run: npm install --save-exact cldr-dates-full@latest
 
-      - name: Install deps
-        run: pip install tomli
+      - name: Generate per-locale data + index
+        run: node tools/generate-cldr.mjs
 
-      - name: Generate TOML
-        run: |
-          python tools/generate_cldr_db.py cldr-json/cldr-json/cldr-dates-full/main/ cldr-dates.toml
+      - name: Check data invariants
+        run: node tools/check-invariants.mjs
 
-      - name: Patch wide days in TOML
-        run: |
-          python tools/patch_wide_days.py cldr-dates.toml
-
-      - name: Move generated TOML to translations folder
-        run: |
-          mkdir -p src/translations
-          mv cldr-dates.toml src/translations/cldr-dates.toml
-
-      - name: Create Pull Request with updated translations
+      - name: Open PR if the data changed
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GH_PUSH_TOKEN }}
-          commit-message: "chore: update CLDR translations TOML"
+          commit-message: "chore: update CLDR data to latest cldr-dates-full"
           branch: cldr-auto-update
-          title: "chore: update CLDR translations TOML"
+          title: "chore: update CLDR data to latest cldr-dates-full"
           body: |
-            Automated update of CLDR translations TOML from latest CLDR release.
+            Automated update: bumped `cldr-dates-full` to the latest release and
+            regenerated the per-locale data + index. Review the diff before merging.
           add-paths: |
-            src/translations/cldr-dates.toml
+            package.json
+            package-lock.json
+            src/translations/**
