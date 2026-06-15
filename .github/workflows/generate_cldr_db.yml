@@ -28,6 +28,9 @@ jobs:
       - name: Generate per-locale data + index
         run: node tools/generate-cldr.mjs
 
+      - name: Check data invariants
+        run: node tools/check-invariants.mjs
+
       - name: Open PR if the data changed
         uses: peter-evans/create-pull-request@v6
         with:
