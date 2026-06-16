@@ -20,6 +20,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "src", "translations");
 const LOCALES_DIR = join(ROOT, "locales");
 const INDEX_PATH = join(ROOT, "index.toml");
+const COMMUNITY_DIR = join(ROOT, "community", "locales");
+const COMMUNITY_INDEX = join(ROOT, "community", "index.toml");
 const DEFAULT_LOCALE = "en";
 
 const USAGES = ["format", "stand-alone"];
@@ -91,27 +93,31 @@ for (const c of ["days", "months"]) {
   for (const u of USAGES) for (const w of WIDTHS) validSections.add(`${c}.${u}.${w}`);
 }
 
-// --- per-file structural checks ---
-for (const locale of locales) {
-  const p = join(LOCALES_DIR, `${locale}.toml`);
-  if (!existsSync(p)) continue; // already reported
-  const data = parseSections(readFileSync(p, "utf8"));
+// Validate section names + key ranges for one parsed file (CLDR or community).
+function validateEntries(label, data) {
   for (const [section, entries] of Object.entries(data)) {
     if (!validSections.has(section)) {
-      fail(`${locale}: unexpected section [${section}]`);
+      fail(`${label}: unexpected section [${section}]`);
       continue;
     }
     for (const [k, v] of Object.entries(entries)) {
-      if (SENTINEL.test(v)) fail(`${locale} [${section}] ${k}: leftover sentinel "${v}"`);
+      if (SENTINEL.test(v)) fail(`${label} [${section}] ${k}: leftover sentinel "${v}"`);
       if (section === "patterns") {
-        if (!PATTERN_KEYS.includes(k)) fail(`${locale} [patterns]: bad key "${k}"`);
+        if (!PATTERN_KEYS.includes(k)) fail(`${label} [patterns]: bad key "${k}"`);
       } else if (section.startsWith("days.")) {
-        if (!/^[1-7]$/.test(k)) fail(`${locale} [${section}]: day key out of range "${k}"`);
+        if (!/^[1-7]$/.test(k)) fail(`${label} [${section}]: day key out of range "${k}"`);
       } else if (section.startsWith("months.")) {
-        if (!/^(1[0-2]|[1-9])$/.test(k)) fail(`${locale} [${section}]: month key out of range "${k}"`);
+        if (!/^(1[0-2]|[1-9])$/.test(k)) fail(`${label} [${section}]: month key out of range "${k}"`);
       }
     }
   }
+}
+
+// --- per-file structural checks (CLDR) ---
+for (const locale of locales) {
+  const p = join(LOCALES_DIR, `${locale}.toml`);
+  if (!existsSync(p)) continue; // already reported
+  validateEntries(locale, parseSections(readFileSync(p, "utf8")));
 }
 
 // --- default locale completeness ---
@@ -139,10 +145,33 @@ if (!existsSync(defPath)) {
   }
 }
 
+// --- community overlay (optional, partial files) ---
+let communityCount = 0;
+if (existsSync(COMMUNITY_INDEX)) {
+  const { locales: comm } = parseIndex(readFileSync(COMMUNITY_INDEX, "utf8"));
+  communityCount = comm.length;
+  const commSet = new Set(comm);
+  const commOnDisk = existsSync(COMMUNITY_DIR)
+    ? readdirSync(COMMUNITY_DIR).filter((f) => f.endsWith(".toml")).map((f) => f.slice(0, -5))
+    : [];
+  for (const l of comm) {
+    const p = join(COMMUNITY_DIR, `${l}.toml`);
+    if (!existsSync(p)) {
+      fail(`community index lists "${l}" but community/locales/${l}.toml is missing`);
+      continue;
+    }
+    // Overlay files are intentionally partial — validate structure only.
+    validateEntries(`community/${l}`, parseSections(readFileSync(p, "utf8")));
+  }
+  for (const f of commOnDisk) {
+    if (!commSet.has(f)) fail(`community/locales/${f}.toml exists but is not in community/index.toml`);
+  }
+}
+
 if (errors.length) {
   console.error(`Invariants FAILED (${errors.length}):`);
   for (const e of errors.slice(0, 50)) console.error("  - " + e);
   if (errors.length > 50) console.error(`  ... and ${errors.length - 50} more`);
   process.exit(1);
 }
-console.log(`Invariants OK: ${locales.length} locales checked.`);
+console.log(`Invariants OK: ${locales.length} locales checked (+${communityCount} community).`);

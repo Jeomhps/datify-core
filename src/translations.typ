@@ -25,18 +25,33 @@
 
 #let _load = (lang) => toml("translations/locales/" + lang + ".toml")
 
+// Opt-in community overlay: hand-maintained data that overrides CLDR for
+// specific locales (regional conventions / styling). It is never written by the
+// generator, so it survives the monthly regeneration. The index is small and
+// eager; overlay files are partial (only the cells they override).
+#let _community-index = toml("translations/community/index.toml")
+#let _community-locales = _community-index.locales
+#let _load-community = (lang) => toml("translations/community/locales/" + lang + ".toml")
+
 // CLDR truncation rule: try the exact code, then drop the trailing subtag and
-// retry, until something is in the index; otherwise the default locale.
-//   "az-Arab-IQ" -> "az-Arab" -> "az" -> ... -> _default-lang
-#let _resolve-lang = (lang) => {
+// retry. Returns the first code present in `locales`, or none.
+//   "az-Arab-IQ" -> "az-Arab" -> "az" -> ...
+#let _resolve-in = (locales, lang) => {
   let parts = lang.split("-")
   while parts.len() > 0 {
     let code = parts.join("-")
-    if _locales.contains(code) {
+    if locales.contains(code) {
       return code
     }
     parts = parts.slice(0, parts.len() - 1)
   }
+  return none
+}
+
+// Resolve against the CLDR index, falling back to the default locale.
+#let _resolve-lang = (lang) => {
+  let code = _resolve-in(_locales, lang)
+  if code != none { return code }
   return _default-lang
 }
 
@@ -50,9 +65,17 @@
     .at(key, default: none)
 }
 
-// Resolve a day/month cell: try the resolved locale, then fall back to the
-// default locale for any cell the resolved locale omitted (root-equal value).
-#let _resolve-cell = (lang, category, usage, width, key) => {
+// Resolve a day/month cell. When `community` is enabled, the overlay is tried
+// first (truncation within the community index); any cell it doesn't define
+// falls through to CLDR (the resolved locale, then the default locale).
+#let _resolve-cell = (lang, category, usage, width, key, community: false) => {
+  if community {
+    let cc = _resolve-in(_community-locales, lang)
+    if cc != none {
+      let cv = _lookup(_load-community(cc), category, usage, width, key)
+      if cv != none { return cv }
+    }
+  }
   let resolved = _resolve-lang(lang)
   let value = _lookup(_load(resolved), category, usage, width, key)
   if value == none and resolved != _default-lang {
@@ -66,6 +89,7 @@
   lang: "en",
   usage: "stand-alone",
   width: "wide",
+  community: false,
 ) => {
   let weekday_type = type(weekday)
 
@@ -93,7 +117,7 @@
     panic("Invalid day width: " + width + " (must be 'wide', 'abbreviated', 'narrow')")
   }
 
-  let value = _resolve-cell(lang, "days", usage, width, weekday_str)
+  let value = _resolve-cell(lang, "days", usage, width, weekday_str, community: community)
   if value == none {
     panic(
       "No day name for weekday " + weekday_str +
@@ -110,6 +134,7 @@
   lang: "en",
   usage: "stand-alone", // "format" or "stand-alone"
   width: "wide", // "wide", "abbreviated", "narrow"
+  community: false,
 ) => {
   let month_type = type(month)
 
@@ -137,7 +162,7 @@
     panic("Invalid month width: " + width + " (must be 'wide', 'abbreviated', 'narrow')")
   }
 
-  let value = _resolve-cell(lang, "months", usage, width, month_str)
+  let value = _resolve-cell(lang, "months", usage, width, month_str, community: community)
   if value == none {
     panic(
       "No month name for month " + month_str +
@@ -154,12 +179,21 @@
 #let get-date-pattern = (
   pattern-type,
   lang: "en",
+  community: false,
 ) => {
   if not (type(pattern-type) == str) {
     panic("Invalid pattern type: must be a string and a known pattern key, got " + str(type(pattern-type)))
   }
   if not _pattern-keys.contains(pattern-type) {
     panic("Unknown pattern type: " + pattern-type + " (must be one of " + _pattern-keys.join(", ") + ")")
+  }
+
+  if community {
+    let cc = _resolve-in(_community-locales, lang)
+    if cc != none {
+      let cv = _load-community(cc).at("patterns", default: (:)).at(pattern-type, default: none)
+      if cv != none { return cv }
+    }
   }
 
   let resolved = _resolve-lang(lang)
