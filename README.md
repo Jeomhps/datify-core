@@ -137,10 +137,14 @@ pure CLDR.
 
 ```typst
 // CLDR (default)
-#get-day-name(1, lang: "pt-BR", usage: "stand-alone", width: "wide") // segunda-feira
-// With the overlay
-#get-day-name(1, lang: "pt-BR", usage: "stand-alone", width: "wide", community: true) // Segunda-feira
+#get-day-name(1, lang: "pt-BR", usage: "format", width: "narrow") // S
+// With the overlay (Brazilian numbered narrow weekday)
+#get-day-name(1, lang: "pt-BR", usage: "format", width: "narrow", community: true) // 2ª
 ```
+
+The overlay holds only data that genuinely differs from CLDR (here, the narrow
+weekday representation). Casing is a presentation choice and is left to the
+caller — the overlay does not, for example, capitalize stand-alone names.
 
 Overlay locales are keyed precisely (e.g. `pt-BR`, not `pt`) so they only affect
 the locales they target. To add or extend one, edit

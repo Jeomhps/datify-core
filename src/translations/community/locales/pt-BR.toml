@@ -1,14 +1,15 @@
 # Community overlay for Brazilian Portuguese (pt-BR).
 #
-# Brazilian conventions that deviate from CLDR, contributed by the community
-# (see issue/PR discussion). This file is hand-maintained and is NOT touched by
-# the generator, so it survives the monthly CLDR regeneration. It is partial:
-# only the cells below override CLDR; everything else falls through to CLDR `pt`.
+# Only data that genuinely differs from CLDR lives here: the common Brazilian
+# numbered narrow weekdays (2ª..6ª, S, D) instead of CLDR's single letters
+# (S, T, Q, Q, S, S, D). This is a different representation, not derivable from
+# the CLDR value.
 #
-# - Stand-alone names are capitalized (used at the start of titles/headers, e.g.
-#   "Novembro de 2025"). Format (mid-sentence) names are intentionally left to
-#   CLDR (lowercase), so "hoje é segunda-feira" stays correct.
-# - Narrow weekdays use the common Brazilian numbered form (2ª..6ª, S, D).
+# Casing (e.g. "Segunda-feira" vs "segunda-feira") is intentionally NOT encoded
+# here: datify-core is a data backend, so capitalization is a presentation
+# choice left to the caller. This file is hand-maintained and is not touched by
+# the generator, so it survives the monthly regeneration. It is partial — every
+# cell it doesn't define falls through to CLDR.
 
 [days.format.narrow]
 1 = "2ª"
@@ -19,24 +20,6 @@
 6 = "S"
 7 = "D"
 
-[days.stand-alone.wide]
-1 = "Segunda-feira"
-2 = "Terça-feira"
-3 = "Quarta-feira"
-4 = "Quinta-feira"
-5 = "Sexta-feira"
-6 = "Sábado"
-7 = "Domingo"
-
-[days.stand-alone.abbreviated]
-1 = "Seg."
-2 = "Ter."
-3 = "Qua."
-4 = "Qui."
-5 = "Sex."
-6 = "Sáb."
-7 = "Dom."
-
 [days.stand-alone.narrow]
 1 = "2ª"
 2 = "3ª"
@@ -45,31 +28,3 @@
 5 = "6ª"
 6 = "S"
 7 = "D"
-
-[months.stand-alone.wide]
-1 = "Janeiro"
-2 = "Fevereiro"
-3 = "Março"
-4 = "Abril"
-5 = "Maio"
-6 = "Junho"
-7 = "Julho"
-8 = "Agosto"
-9 = "Setembro"
-10 = "Outubro"
-11 = "Novembro"
-12 = "Dezembro"
-
-[months.stand-alone.abbreviated]
-1 = "Jan."
-2 = "Fev."
-3 = "Mar."
-4 = "Abr."
-5 = "Mai."
-6 = "Jun."
-7 = "Jul."
-8 = "Ago."
-9 = "Set."
-10 = "Out."
-11 = "Nov."
-12 = "Dez."

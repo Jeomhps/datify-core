@@ -47,12 +47,12 @@
 // --- Community overlay (opt-in) ---
 // Off by default: pt-BR is community-only, so it resolves to CLDR pt.
 #assert.eq(get-day-name(1, lang: "pt-BR", usage: "format", width: "narrow"), "S")
-#assert.eq(get-day-name(1, lang: "pt-BR", usage: "stand-alone", width: "wide"), "segunda-feira")
-// On: the overlay overrides the cells it defines (Brazilian conventions).
+// On: the overlay overrides only the narrow weekdays (Brazilian numbered form).
 #assert.eq(get-day-name(1, lang: "pt-BR", usage: "format", width: "narrow", community: true), "2ª")
-#assert.eq(get-day-name(1, lang: "pt-BR", usage: "stand-alone", width: "wide", community: true), "Segunda-feira")
-#assert.eq(get-month-name(11, lang: "pt-BR", usage: "stand-alone", width: "wide", community: true), "Novembro")
-// Cells the overlay doesn't define still come from CLDR, even with community: true.
-#assert.eq(get-day-name(1, lang: "pt-BR", usage: "format", width: "wide", community: true), "segunda-feira")
+#assert.eq(get-day-name(1, lang: "pt-BR", usage: "stand-alone", width: "narrow", community: true), "2ª")
+// Cells the overlay doesn't define still come from CLDR, even with community:
+// true (casing is a presentation choice left to the caller, not baked in).
+#assert.eq(get-day-name(1, lang: "pt-BR", usage: "stand-alone", width: "wide", community: true), "segunda-feira")
+#assert.eq(get-month-name(11, lang: "pt-BR", usage: "stand-alone", width: "wide", community: true), "novembro")
 // Overlay is keyed pt-BR, so plain pt is unaffected even with community: true.
-#assert.eq(get-day-name(1, lang: "pt", usage: "stand-alone", width: "wide", community: true), "segunda-feira")
+#assert.eq(get-day-name(1, lang: "pt", usage: "format", width: "narrow", community: true), "S")
